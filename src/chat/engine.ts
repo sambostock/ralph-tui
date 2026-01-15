@@ -228,14 +228,18 @@ export class ChatEngine {
 
       if (result.status !== 'completed') {
         this.setStatus('error');
+        // Build a useful error message: prefer explicit error, then stderr, then generic status
+        const errorMessage =
+          result.error ||
+          (result.stderr?.trim() ? result.stderr.trim() : `Execution ${result.status}`);
         this.emit({
           type: 'error:occurred',
           timestamp: new Date(),
-          error: result.error || `Execution ${result.status}`,
+          error: errorMessage,
         });
         return {
           success: false,
-          error: result.error || `Execution ${result.status}`,
+          error: errorMessage,
           durationMs,
         };
       }
